@@ -1,0 +1,5 @@
+{
+  "name": "GH-SG-Auto",
+
+  "postStartCommand": "bash .devcontainer/start.sh"
+}
