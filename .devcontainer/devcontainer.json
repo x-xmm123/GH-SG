@@ -1,5 +1,5 @@
 {
   "name": "GH-SG-Auto",
-
-  "postStartCommand": "bash .devcontainer/start.sh"
+  "postStartCommand": "bash .devcontainer/start.sh",
+  "postAttachCommand": "bash .devcontainer/start.sh"
 }
