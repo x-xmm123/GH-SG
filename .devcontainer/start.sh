@@ -2,7 +2,7 @@
 
 echo "等待 Codespaces 网络初始化..."
 
-sleep 15
+sleep 30
 
 echo "进入 python-xray-argo"
 
