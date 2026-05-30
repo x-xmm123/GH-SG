@@ -1,42 +1,43 @@
 #!/bin/bash
 
-echo "等待 Codespaces 网络初始化..."
+echo "启动入口触发: $(date)"
 
-sleep 30
+cd /workspaces/GH-SG/python-xray-argo || exit 1
 
-echo "进入 python-xray-argo"
+mkdir -p .cache
 
-cd /workspaces/GH-SG/python-xray-argo
+# ===== 防止重复启动 app.py =====
+if pgrep -f "app.py" > /dev/null; then
+    echo "app.py 已在运行，跳过启动"
+else
+    echo "启动 app.py"
+    nohup python app.py > app.log 2>&1 &
+fi
 
-echo "安装依赖..."
+# ===== 等待 sub.txt（带超时更安全）=====
+TIMEOUT=600
+COUNT=0
 
-pip install -r requirements.txt || true
-
-echo "启动 app.py"
-
-nohup python app.py > app.log 2>&1 &
-
-echo "等待 .cache/sub.txt 生成..."
-
-while [ ! -s .cache/sub.txt ]
-do
-    echo "sub.txt 尚未生成..."
+while [ ! -s .cache/sub.txt ]; do
+    echo "等待 sub.txt..."
     sleep 5
+    COUNT=$((COUNT+5))
+
+    if [ $COUNT -ge $TIMEOUT ]; then
+        echo "超时，退出等待"
+        exit 1
+    fi
 done
 
-echo "检测到 .cache/sub.txt"
+echo "sub.txt 已生成"
 
-echo "返回主目录"
+# ===== 防止重复上传 =====
+if pgrep -f "shangchuanusb.sh" > /dev/null; then
+    echo "上传脚本已运行，跳过"
+else
+    cd /workspaces/GH-SG
+    chmod +x shangchuanusb.sh
+    nohup ./shangchuanusb.sh > usb.log 2>&1 &
+fi
 
-cd /workspaces/GH-SG
-
-echo "给予上传脚本权限"
-
-chmod +x shangchuanusb.sh
-
-echo "执行上传脚本"
-
-nohup ./shangchuanusb.sh > usb.log 2>&1 &
-
-echo "全部任务启动完成"
-
+echo "启动流程完成"
